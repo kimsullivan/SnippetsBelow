@@ -181,7 +181,7 @@ const advisorQuestions: Question[] = [
       },
     ],
   },
-  // Organization’s Point of Contact for this Grant Opportunity
+  // Organization's Point of Contact for this Grant Opportunity
   {
     id: "contact-name",
     title: "Name",
@@ -319,7 +319,7 @@ const advisorQuestions: Question[] = [
   // Organization Programming
   {
     id: "programming-description",
-    title: "Briefly describe your organization’s primary programs and services",
+    title: "Briefly describe your organization's primary programs and services",
     field: "programming-description",
     answers: [],
   },
@@ -509,14 +509,15 @@ export default function Component() {
         result.push(oldWords[i]);
         i++; j++;
       } else if (newWords[j] && !oldWords.includes(newWords[j])) {
-        result.push(<span style={{ background: '#d1fae5', color: '#065f46', fontWeight: 600 }}>{newWords[j]}</span>);
+        // Subtle twilight highlight for additions/changes, but text color #333
+        result.push(<span style={{ background: '#ede9fe', color: '#333', fontWeight: 500 }}>{newWords[j]}</span>);
         j++;
       } else if (oldWords[i] && !newWords.includes(oldWords[i])) {
         result.push(<span style={{ color: '#b91c1c', textDecoration: 'line-through' }}>{oldWords[i]}</span>);
         i++;
       } else {
         // modification
-        result.push(<span style={{ background: '#fef08a', fontWeight: 600 }}>{newWords[j] || ''}</span>);
+        result.push(<span style={{ background: '#ede9fe', color: '#333', fontWeight: 500 }}>{newWords[j] || ''}</span>);
         i++; j++;
       }
     }
@@ -560,95 +561,40 @@ export default function Component() {
     setShowAdvisorHeaderFade(el.scrollTop > 0);
   };
 
+  // Update generateRevision to follow the quick prompt direction
   const generateRevision = (prompt: string, currentText: string, fieldType: string) => {
-    if (!currentText.trim()) {
-      return "Please add some content first, then I can help you polish it!"
-    }
-
     switch (prompt) {
-      case "Make it more concise":
-        if (activeQuestion && fieldType === "mission") {
-          return currentText.length > 100
-            ? currentText.split(".")[0] + ". " + currentText.split(".").slice(1).join(".").substring(0, 50) + "..."
-            : currentText.substring(0, Math.max(50, currentText.length - 20)) + "."
-        }
-        return currentText.substring(0, Math.max(20, currentText.length * 0.7)) + (currentText.length > 20 ? "..." : "")
-
-      case "Add more professional language":
-        if (activeQuestion && fieldType === "mission") {
-          return currentText
-            .replace(/help/g, "support")
-            .replace(/kids/g, "youth")
-            .replace(/get/g, "obtain")
-            .replace(/make/g, "create")
-            .replace(/good/g, "effective")
-            .replace(/We want to/g, "Our organization is committed to")
-            .replace(/We /g, "The organization ")
-        }
-        return currentText.replace(/help/g, "assist").replace(/get/g, "obtain").replace(/make/g, "facilitate")
-
-      case "Include specific metrics":
-        if (activeQuestion && fieldType === "mission") {
-          const metrics = [
-            "serving over 500 youth annually",
-            "with a 85% program completion rate",
-            "reaching 12 underserved communities",
-            "through evidence-based programming",
-          ]
-          const randomMetric = metrics[Math.floor(Math.random() * metrics.length)]
-          return currentText + " " + randomMetric + "."
-        }
-        return currentText + " (established 2018, serving 300+ community members annually)"
-
-      case "Adjust tone for grant reviewers":
-        if (activeQuestion && fieldType === "mission") {
-          return (
-            currentText
-              .replace(/We are/g, "This organization is")
-              .replace(/Our mission/g, "The organizational mission")
-              .replace(/we /g, "the organization ")
-              .replace(/community/g, "target population") +
-            " This mission aligns with evidence-based practices and measurable outcomes."
-          )
-        }
-        return "As documented in our organizational charter, " + currentText.toLowerCase()
-
-      case "Make it more compelling":
-        if (activeQuestion && fieldType === "mission") {
-          const compelling = [
-            "Through innovative, community-driven solutions, ",
-            "With unwavering commitment to social justice, ",
-            "By addressing root causes of inequality, ",
-            "Through transformative programming, ",
-          ]
-          const randomStart = compelling[Math.floor(Math.random() * compelling.length)]
-          return (
-            randomStart +
-            currentText.toLowerCase() +
-            " Our work creates lasting, measurable impact in the communities we serve."
-          )
-        }
-        return "Dedicated to excellence, " + currentText.toLowerCase() + " - making a measurable difference every day."
-
-      case "Add concrete examples":
-        if (activeQuestion && fieldType === "mission") {
-          const examples = [
-            "including after-school tutoring, mentorship programs, and career readiness workshops",
-            "such as financial literacy training, job placement services, and educational scholarships",
-            "through community gardens, health screenings, and family support services",
-            "via leadership development, civic engagement training, and advocacy initiatives",
-          ]
-          const randomExample = examples[Math.floor(Math.random() * examples.length)]
-          return currentText + " " + randomExample + "."
-        }
+      case "Expand on this":
         return (
-          currentText + " Examples include community outreach, educational workshops, and direct service provision."
-        )
-
+          currentText +
+          " We also provide wraparound support, family engagement, and access to enrichment activities that foster holistic youth development."
+        );
+      case "Make funder aligned":
+        return (
+          currentText +
+          " Our outcomes are measured in partnership with funders to ensure accountability and maximize impact. This aligns with funder priorities, as most funders seek clear, measurable results and evidence of effective use of resources."
+        );
+      case "Match word count":
+        return (
+          currentText.length > 100
+            ? currentText.slice(0, 100) + "..."
+            : currentText +
+              " (Expanded to meet word count requirements by providing additional context and details about our programs and their impact.)"
+        );
+      case "Add concrete examples":
+        return (
+          currentText +
+          " For example, last year we launched a STEM club, organized a youth leadership summit, and provided 1:1 mentorship to over 50 students."
+        );
+      case "Make more persuasive":
+        return (
+          "By supporting our mission, you are investing in the future of our community. " + currentText +
+          " Join us in creating lasting change for generations to come."
+        );
       default:
-        return currentText + " [Enhanced with AI assistance]"
+        return currentText;
     }
-  }
+  };
 
   // In handleFieldFocus, clear chat and advisor state on question click
   const handleFieldFocus = (fieldId: string) => {
@@ -993,6 +939,61 @@ export default function Component() {
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [savingPromptText, setSavingPromptText] = useState<string | null>(null);
 
+  // 1. Add click-outside logic for sources and saved prompts menus
+  const sourcesMenuRef = useRef<HTMLDivElement>(null);
+  const savedPromptsMenuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (showSourceMaterial && sourcesMenuRef.current && !sourcesMenuRef.current.contains(event.target as Node)) {
+        setShowSourceMaterial(false);
+      }
+      if (showSavedPrompts && savedPromptsMenuRef.current && !savedPromptsMenuRef.current.contains(event.target as Node)) {
+        setShowSavedPrompts(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSourceMaterial, showSavedPrompts]);
+
+  // 2. Add ability to add new sources in the source material menu
+  const [newSource, setNewSource] = useState("");
+  const [customSources, setCustomSources] = useState<string[]>([]);
+  const allSources = [...getAllSources(), ...customSources];
+
+  // Add state to track selected sources
+  const [selectedSources, setSelectedSources] = useState<string[]>(allSources);
+
+  // Add state for add source UI and staged sources
+  const [showAddSourceInput, setShowAddSourceInput] = useState(false);
+  const [stagedSelectedSources, setStagedSelectedSources] = useState<string[]>(selectedSources);
+  const [sourcesChanged, setSourcesChanged] = useState(false);
+
+  // Handler to toggle a source in staged selection
+  const handleToggleSourceStaged = (source: string) => {
+    setStagedSelectedSources(prev =>
+      prev.includes(source)
+        ? prev.filter(s => s !== source)
+        : [...prev, source]
+    );
+    setSourcesChanged(true);
+  };
+
+  // Handler to save staged sources
+  const handleSaveSources = () => {
+    setSelectedSources(stagedSelectedSources);
+    setSourcesChanged(false);
+    setShowSourceMaterial(false); // Close the menu after saving
+  };
+
+  // Handler to toggle a source
+  const handleToggleSource = (source: string) => {
+    setSelectedSources(prev =>
+      prev.includes(source)
+        ? prev.filter(s => s !== source)
+        : [...prev, source]
+    );
+  };
+
   return (
     <div className="h-screen bg-white flex overflow-hidden">
       {/* Application Section - 2/3 */}
@@ -1022,6 +1023,7 @@ export default function Component() {
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-8 py-8 pb-8">
             <div className="mb-8">
+              {/* Application Title */}
               <h1 className="text-4xl font-bold text-sblack mb-4 leading-tight lato-bold pt-10">
                 Foot Locker Foundation Community
                 <br />
@@ -1307,9 +1309,10 @@ export default function Component() {
           {/* Chat Messages - Show in both general and question states */}
           {!activeQuestion && chatMessages.length === 0 && !isTyping && (
             <div className="flex flex-col items-start justify-center h-full py-12 animate-in fade-in duration-500">
-              <h2 className="text-base font-bold text-twilight mb-2 text-left">Nicole, Advisor is here to help.</h2>
+              {/* Advisor Welcome */}
+              <h2 className="text-base font-bold text-twilight mb-2 text-left" style={{ color: '#1A174B' }}>Nicole, Advisor is here to help.</h2>
               <p className="text-sm text-gray-600 mb-4 text-left max-w-md">
-                Think ChatGPT, but trained on your organization’s documents plus exclusive funder insights to help you write winning proposals.
+                Think ChatGPT, but trained on your organization's documents plus exclusive funder insights to help you write winning proposals.
               </p>
               <p className="text-sm text-twilight-700 text-left max-w-md">
                 Click on any form field to get tailored suggestions, or ask me anything about the application process.
@@ -1328,7 +1331,7 @@ export default function Component() {
                     <div className="max-w-[85%] p-4 rounded-lg bg-white text-gray-900 text-sm leading-relaxed border border-gray-200">
                       <p className="text-sm font-semibold mb-1">Original:</p>
                       <div className="text-sm leading-relaxed mb-3 whitespace-pre-line">{diffWords(message.originalText || '', message.originalText || '')}</div>
-                      <p className="text-sm font-semibold mb-1">Revised:</p>
+                      <p className="text-sm font-semibold mb-1">Revised (changes highlighted):</p>
                       <div className="text-sm leading-relaxed mb-3 whitespace-pre-line">{diffWords(message.originalText || '', message.revisedText || '')}</div>
                       <div className="flex gap-2 mt-4">
                         <Button
@@ -1349,6 +1352,11 @@ export default function Component() {
                           Confirm changes and insert
                         </Button>
                       </div>
+                      {message.content && message.content.toLowerCase().includes('funder aligned') && message.revisedText && message.revisedText.includes('This aligns with funder priorities') && (
+                        <div className="mt-3 p-2 rounded bg-gray-100 text-gray-700 text-xs font-medium border border-gray-200">
+                          <span className="font-semibold">Why funder aligned?</span> This aligns with Foot Locker Foundation's priorities—youth empowerment, measurable community impact, and alignment with their mission to support opportunities for underserved youth. Funders like Foot Locker Foundation look for clear outcomes and evidence that your work advances their specific goals.
+                        </div>
+                      )}
                     </div>
                   ) : message.type === 'save-prompt' ? (
                     <div className="w-full flex flex-col items-start">
@@ -1527,7 +1535,7 @@ export default function Component() {
                                       </div>
                                     </div>
                                     {/* Content */}
-                                    <p className="text-sm text-gray-700 leading-relaxed transition-colors duration-200 mb-2">
+                                    <p className="text-sm text-gray-700 leading-relaxed transition-colors duration-200 mb-2 break-words whitespace-pre-line">
                                       {answer.detailedText}
                                     </p>
                                     {/* Sources chip */}
@@ -1605,20 +1613,57 @@ export default function Component() {
             >
               {/* Source Material Dropdown */}
               {showSourceMaterial && (
-                <div className="absolute bottom-16 left-3 border border-gray-200 rounded-lg bg-white shadow-sm animate-in slide-in-from-bottom-2 duration-300 z-10">
+                <div ref={sourcesMenuRef} className="absolute bottom-16 left-3 border border-gray-200 rounded-lg bg-white shadow-sm animate-in slide-in-from-bottom-2 duration-300 z-10">
                   <div className="p-3">
                     <h4 className="font-medium text-gray-900 mb-2 text-sm">Referenced Documents:</h4>
                     <div className="space-y-1 max-h-32 overflow-y-auto">
-                      {getAllSources().map((source, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 p-1 rounded hover:bg-gray-50 transition-colors duration-200"
-                        >
+                      {allSources.map((source, index) => (
+                        <label key={index} className="flex items-center gap-2 p-1 rounded hover:bg-gray-50 transition-colors duration-200 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={stagedSelectedSources.includes(source)}
+                            onChange={() => handleToggleSourceStaged(source)}
+                            className="accent-twilight"
+                          />
                           <FileText className="w-3 h-3 text-gray-400" />
                           <span className="text-sm text-gray-700">{source}</span>
-                        </div>
+                        </label>
                       ))}
                     </div>
+                    {!showAddSourceInput ? (
+                      <button
+                        className="text-xs text-twilight font-medium mt-3 hover:underline"
+                        onClick={() => setShowAddSourceInput(true)}
+                      >
+                        + Add source
+                      </button>
+                    ) : (
+                      <form
+                        className="flex gap-2 mt-3"
+                        onSubmit={e => {
+                          e.preventDefault();
+                          if (newSource.trim()) {
+                            setCustomSources(prev => [...prev, newSource.trim()]);
+                            setNewSource("");
+                            setShowAddSourceInput(false);
+                            setSourcesChanged(true);
+                          }
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={newSource}
+                          onChange={e => setNewSource(e.target.value)}
+                          placeholder="Add new source..."
+                          className="border border-gray-300 rounded px-2 py-1 text-xs flex-1"
+                          autoFocus
+                        />
+                        <Button type="submit" size="sm" className="h-7 px-2 text-xs">Add</Button>
+                      </form>
+                    )}
+                    {sourcesChanged && (
+                      <Button onClick={handleSaveSources} size="sm" className="mt-3 w-full h-8 text-xs bg-twilight text-white hover:bg-twilight-500">Save</Button>
+                    )}
                     <p className="text-sm text-gray-400 mt-2">Documents informing AI suggestions</p>
                   </div>
                 </div>
@@ -1626,7 +1671,7 @@ export default function Component() {
 
               {/* Saved Prompts Dropdown */}
               {showSavedPrompts && (
-                <div className="absolute bottom-16 left-20 border border-gray-200 rounded-lg bg-white shadow-sm animate-in slide-in-from-bottom-2 duration-300 z-10">
+                <div ref={savedPromptsMenuRef} className="absolute bottom-16 left-20 border border-gray-200 rounded-lg bg-white shadow-sm animate-in slide-in-from-bottom-2 duration-300 z-10">
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900 text-sm">Saved Prompts:</h4>

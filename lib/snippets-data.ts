@@ -42,4 +42,16 @@ export const snippets: Snippet[] = [
     text: "We collaborate with stakeholders to ensure program relevance.",
     categories: ["Most commonly used", "Paraphrased"]
   }
+];
+
+export const sources: string[] = [
+  "2023 Organization Overview.pdf",
+  "FY24 Approved Budget.xlsx",
+  "2022 Annual Impact Report.docx",
+  "Past Grant Proposal - Youth Empowerment Initiative.pdf",
+  "Board of Directors Roster.docx",
+  "IRS 501(c)(3) Determination Letter.pdf",
+  "2023 Community Needs Assessment.pdf",
+  "2021-2023 Strategic Plan.pptx",
+  "Sample Funded Proposal - Health Equity.docx"
 ]; 
