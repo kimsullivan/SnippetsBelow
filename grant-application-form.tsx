@@ -664,10 +664,8 @@ export default function Component() {
     const answerToPin = activeQuestion.answers[answerIndex]
     setPinnedAnswer(answerToPin)
 
-    // First add the answer
-    handleAnswerSelect(field, answer, answerIndex)
-
-    // Then immediately trigger polish mode
+    // Do NOT add the answer to the field here
+    // Only trigger polish mode
     setTimeout(() => {
       handlePolishRequest()
     }, 100)
